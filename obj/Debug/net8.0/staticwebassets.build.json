@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "3X0WGrU2HrUN+4X2iLZuoHjeNowP+X8fq2BPA7qRhLA=",
+  "Source": "AgroMarket.Backend",
+  "BasePath": "_content/AgroMarket.Backend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
