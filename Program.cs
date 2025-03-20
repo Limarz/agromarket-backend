@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
     {
-        builder.WithOrigins("https://localhost:3000")
+        builder.WithOrigins("https://localhost:3000,https://agromarket-frontend.onrender.com")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();

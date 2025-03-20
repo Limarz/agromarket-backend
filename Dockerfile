@@ -16,8 +16,10 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 # Указываем порт, который будет использоваться
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+
+# Указываем переменную окружения для порта
+ENV ASPNETCORE_URLS=http://+:8080
 
 # Запускаем приложение
 ENTRYPOINT ["dotnet", "AgroMarket.Backend.dll"]
