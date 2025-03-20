@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
     {
-        builder.WithOrigins("https://localhost:3000,https://agromarket-frontend.onrender.com")
+        builder.WithOrigins("https://localhost:3000", "https://agromarket-frontend.onrender.com")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -57,7 +57,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Проверка строки подключения и подключения к базе данных
-// Добавлено: отладочное сообщение перед попыткой подключения
 Console.WriteLine("Starting database connection attempt...");
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -81,7 +80,6 @@ using (var connection = new MySqlConnection(connectionString))
     }
 }
 
-// Добавлено: отладочное сообщение после попытки подключения
 Console.WriteLine("Finished database connection attempt.");
 
 var app = builder.Build();
@@ -98,26 +96,29 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles(); // Добавляем поддержку статических файлов
 app.UseRouting();
 
 app.UseCors("AllowLocalhost");
+
+// Добавляем обработку OPTIONS запросов
+app.Use((context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+        context.Response.StatusCode = 200;
+        return Task.CompletedTask;
+    }
+    return next();
+});
+
 app.UseSession();
 app.UseAuthorization();
 
 app.MapControllers();
-/*
-// Временный код для генерации хэшей
-Console.WriteLine("Генерация хэшей для паролей...");
-string adminPassword = "admin";
-string userPassword = "password";
 
-string adminHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
-string userHash = BCrypt.Net.BCrypt.HashPassword(userPassword);
-
-Console.WriteLine($"Хэш для пароля 'admin': {adminHash}");
-Console.WriteLine($"Хэш для пароля 'password': {userHash}");
-Console.WriteLine("Скопируйте хэши и обновите базу данных. После этого закомментируйте этот код.");
-*/
 app.Run();
