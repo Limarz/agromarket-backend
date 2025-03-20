@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json.Serialization;
+using MySql.Data.MySqlClient;
+using BCrypt.Net; // Добавляем для BCrypt
 
 // Добавляем CORS с поддержкой credentials
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +56,34 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Проверка строки подключения и подключения к базе данных
+// Добавлено: отладочное сообщение перед попыткой подключения
+Console.WriteLine("Starting database connection attempt...");
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Connection String: {connectionString}");
+
+using (var connection = new MySqlConnection(connectionString))
+{
+    try
+    {
+        connection.Open();
+        Console.WriteLine("Successfully connected to the database!");
+        using (var command = new MySqlCommand("SELECT DATABASE();", connection))
+        {
+            var dbName = command.ExecuteScalar()?.ToString();
+            Console.WriteLine($"Connected to database: {dbName}");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to connect to the database: {ex.Message}");
+    }
+}
+
+// Добавлено: отладочное сообщение после попытки подключения
+Console.WriteLine("Finished database connection attempt.");
+
 var app = builder.Build();
 
 // Настройка pipeline (порядок важен!)
@@ -77,5 +107,17 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapControllers();
+/*
+// Временный код для генерации хэшей
+Console.WriteLine("Генерация хэшей для паролей...");
+string adminPassword = "admin";
+string userPassword = "password";
 
+string adminHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+string userHash = BCrypt.Net.BCrypt.HashPassword(userPassword);
+
+Console.WriteLine($"Хэш для пароля 'admin': {adminHash}");
+Console.WriteLine($"Хэш для пароля 'password': {userHash}");
+Console.WriteLine("Скопируйте хэши и обновите базу данных. После этого закомментируйте этот код.");
+*/
 app.Run();
