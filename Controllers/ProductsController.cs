@@ -62,28 +62,28 @@ namespace AgroMarket.Backend.Controllers
                 var productCount = await _context.Products.CountAsync();
                 Console.WriteLine($"Найдено {productCount} продуктов в базе данных.");
 
-                // Проверяем, есть ли записи в таблице Categories
-                Console.WriteLine("Проверяем наличие записей в таблице Categories...");
-                var categoryCount = await _context.Categories.CountAsync();
-                Console.WriteLine($"Найдено {categoryCount} категорий в базе данных.");
-
-                // Упрощённый запрос
+                // Упрощённый запрос: убираем всё, что связано с Category
                 Console.WriteLine("Загружаем продукты из базы данных...");
                 var products = await _context.Products
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
-                        Name = p.Name ?? "Без названия", // Добавляем значение по умолчанию
+                        Name = p.Name ?? "Без названия",
                         Price = p.Price,
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
                         ImageUrl = p.ImageUrl ?? "Без изображения",
-                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                        Category = "Без категории" // Убираем доступ к Category
                     })
                     .Take(5) // Ограничиваем количество записей для теста
                     .ToListAsync();
 
                 Console.WriteLine($"Успешно загружено {products.Count} продуктов");
+                foreach (var product in products)
+                {
+                    Console.WriteLine($"Продукт: Id={product.Id}, Name={product.Name}, Price={product.Price}");
+                }
+
                 return Ok(products);
             }
             catch (Exception ex)
@@ -128,7 +128,7 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
                         ImageUrl = p.ImageUrl ?? "Без изображения",
-                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                        Category = "Без категории"
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
 
