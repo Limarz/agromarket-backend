@@ -224,23 +224,55 @@ namespace AgroMarket.Backend.Controllers
             await _context.SaveChangesAsync();
             return Ok(product);
         }
-        [HttpGet("products")]
+
+        // Метод для получения списка всех товаров
+        [HttpGet("all-products")] // Изменили маршрут с "products" на "all-products"
         public async Task<IActionResult> GetAllProducts()
-{
-            var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                 return Unauthorized(new { Message = "Пользователь не авторизован." });
+        {
+            try
+            {
+                Console.WriteLine("Получен запрос на получение всех продуктов (AdminController)");
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                {
+                    Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    return Unauthorized(new { Message = "Пользователь не авторизован." });
+                }
 
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Username == username);
 
-            if (user == null || user.Role?.Name != "Admin")
-             return Unauthorized(new { Message = "Доступ только для администраторов." });
+                if (user == null || user.Role?.Name != "Admin")
+                {
+                    Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
+                    return Unauthorized(new { Message = "Доступ только для администраторов." });
+                }
 
-            var products = await _context.Products.ToListAsync();
-            return Ok(products);
-}
+                var products = await _context.Products
+                    .Select(p => new ProductDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name ?? "Без названия",
+                        Price = p.Price,
+                        Stock = p.Stock,
+                        Description = p.Description ?? "Без описания",
+                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        Category = "Без категории"
+                    })
+                    .ToListAsync();
+
+                Console.WriteLine($"Успешно загружено {products.Count} продуктов (AdminController)");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка в GetAllProducts (AdminController): {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return StatusCode(500, new { Message = "Внутренняя ошибка сервера", Details = ex.Message });
+            }
+        }
+
         // Метод для удаления товара
         [HttpDelete("products/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
@@ -264,5 +296,17 @@ namespace AgroMarket.Backend.Controllers
     {
         public int UserId { get; set; }
         public bool Approve { get; set; }
+    }
+
+    // Добавляем DTO для продуктов
+    public class ProductDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public string Category { get; set; }
     }
 }

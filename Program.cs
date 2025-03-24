@@ -9,8 +9,17 @@ using System.Text.Json.Serialization;
 using MySql.Data.MySqlClient;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Настройка Data Protection
+var keysDirectory = Path.Combine(Directory.GetCurrentDirectory(), "storage", "DataProtection-Keys");
+Directory.CreateDirectory(keysDirectory); // Создаём папку, если её нет
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory))
+    .SetApplicationName("AgroMarket");
 
 // Добавляем CORS с поддержкой credentials
 builder.Services.AddCors(options =>
