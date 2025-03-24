@@ -47,36 +47,25 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не найден." });
                 }
 
-                // Тестовый ответ без базы данных
-                Console.WriteLine("Возвращаем тестовый список продуктов...");
-                var products = new List<ProductDto>
-                {
-                    new ProductDto
+                // Получаем продукты из базы данных с категориями
+                var products = await _context.Products
+                    .Include(p => p.Category) // Подключаем категорию
+                    .Select(p => new ProductDto
                     {
-                        Id = 1,
-                        Name = "Тестовый продукт 1",
-                        Price = 100,
-                        Stock = 10,
-                        Description = "Описание тестового продукта 1",
-                        ImageUrl = "test-image1.jpg",
-                        Category = "Тестовая категория"
-                    },
-                    new ProductDto
-                    {
-                        Id = 2,
-                        Name = "Тестовый продукт 2",
-                        Price = 200,
-                        Stock = 20,
-                        Description = "Описание тестового продукта 2",
-                        ImageUrl = "test-image2.jpg",
-                        Category = "Тестовая категория"
-                    }
-                };
+                        Id = p.Id,
+                        Name = p.Name ?? "Без названия",
+                        Price = p.Price,
+                        Stock = p.Stock,
+                        Description = p.Description ?? "Без описания",
+                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                    })
+                    .ToListAsync();
 
-                Console.WriteLine($"Успешно возвращено {products.Count} тестовых продуктов");
+                Console.WriteLine($"Успешно загружено {products.Count} продуктов");
                 foreach (var product in products)
                 {
-                    Console.WriteLine($"Продукт: Id={product.Id}, Name={product.Name}, Price={product.Price}");
+                    Console.WriteLine($"Продукт: Id={product.Id}, Name={product.Name}, Price={product.Price}, Category={product.Category}");
                 }
 
                 return Ok(products);
@@ -115,6 +104,7 @@ namespace AgroMarket.Backend.Controllers
                 }
 
                 var product = await _context.Products
+                    .Include(p => p.Category) // Подключаем категорию
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -123,7 +113,7 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
                         ImageUrl = p.ImageUrl ?? "Без изображения",
-                        Category = "Без категории"
+                        Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -155,7 +145,9 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
@@ -216,7 +208,9 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
@@ -289,7 +283,9 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Username == username);
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
@@ -323,17 +319,6 @@ namespace AgroMarket.Backend.Controllers
                 return StatusCode(500, new { Message = "Внутренняя ошибка сервера", Details = ex.Message });
             }
         }
-    }
-
-    public class ProductDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public int Stock { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-        public string Category { get; set; }
     }
 
     public class ProductCreateModel

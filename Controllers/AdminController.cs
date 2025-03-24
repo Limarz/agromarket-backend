@@ -1,5 +1,5 @@
 using AgroMarket.Backend.Data;
-using AgroMarket.Backend.Models;
+using AgroMarket.Backend.Models; // Добавляем для ProductDto
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -226,7 +226,7 @@ namespace AgroMarket.Backend.Controllers
         }
 
         // Метод для получения списка всех товаров
-        [HttpGet("all-products")] // Изменили маршрут с "products" на "all-products"
+        [HttpGet("all-products")]
         public async Task<IActionResult> GetAllProducts()
         {
             try
@@ -296,17 +296,5 @@ namespace AgroMarket.Backend.Controllers
     {
         public int UserId { get; set; }
         public bool Approve { get; set; }
-    }
-
-    // Добавляем DTO для продуктов
-    public class ProductDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public int Stock { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-        public string Category { get; set; }
     }
 }
