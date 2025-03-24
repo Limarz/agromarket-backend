@@ -30,6 +30,23 @@ namespace AgroMarket.Backend.Controllers
             {
                 Console.WriteLine("Получен запрос на получение списка товаров");
 
+                // Проверяем сессию
+                var username = HttpContext.Session.GetString("Username");
+                Console.WriteLine($"Username из сессии: {username}");
+                if (string.IsNullOrEmpty(username))
+                {
+                    Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    return Unauthorized(new { Message = "Пользователь не авторизован." });
+                }
+
+                Console.WriteLine($"Поиск пользователя: Username={username}");
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    Console.WriteLine("Пользователь не найден в базе данных.");
+                    return Unauthorized(new { Message = "Пользователь не найден." });
+                }
+
                 // Проверяем доступность базы данных
                 Console.WriteLine("Проверяем доступность базы данных...");
                 var canConnect = await _context.Database.CanConnectAsync();
@@ -45,18 +62,23 @@ namespace AgroMarket.Backend.Controllers
                 var productCount = await _context.Products.CountAsync();
                 Console.WriteLine($"Найдено {productCount} продуктов в базе данных.");
 
-                // Упрощаем запрос до минимума
+                // Проверяем, есть ли записи в таблице Categories
+                Console.WriteLine("Проверяем наличие записей в таблице Categories...");
+                var categoryCount = await _context.Categories.CountAsync();
+                Console.WriteLine($"Найдено {categoryCount} категорий в базе данных.");
+
+                // Упрощённый запрос
                 Console.WriteLine("Загружаем продукты из базы данных...");
                 var products = await _context.Products
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
-                        Name = p.Name,
+                        Name = p.Name ?? "Без названия", // Добавляем значение по умолчанию
                         Price = p.Price,
                         Stock = p.Stock,
-                        Description = p.Description,
-                        ImageUrl = p.ImageUrl,
-                        Category = "Тестовая категория" // Временно убираем доступ к Category
+                        Description = p.Description ?? "Без описания",
+                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .Take(5) // Ограничиваем количество записей для теста
                     .ToListAsync();
@@ -101,12 +123,12 @@ namespace AgroMarket.Backend.Controllers
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
-                        Name = p.Name,
+                        Name = p.Name ?? "Без названия",
                         Price = p.Price,
                         Stock = p.Stock,
-                        Description = p.Description,
-                        ImageUrl = p.ImageUrl,
-                        Category = "Тестовая категория"
+                        Description = p.Description ?? "Без описания",
+                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
 
