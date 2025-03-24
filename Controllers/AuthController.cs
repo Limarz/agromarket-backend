@@ -3,6 +3,7 @@ using AgroMarket.Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using BCrypt.Net;
 
 namespace AgroMarket.Backend.Controllers
 {
@@ -125,7 +126,10 @@ namespace AgroMarket.Backend.Controllers
             HttpContext.Session.SetString("Username", user.Username);
             HttpContext.Session.SetString("Role", user.Role?.Name ?? "Customer");
 
+            // Логируем SessionId и проверяем, что сессия установлена
             Console.WriteLine($"Сессия создана: UserId={user.Id}, Username={user.Username}, SessionId={HttpContext.Session.Id}");
+            var sessionUsername = HttpContext.Session.GetString("Username");
+            Console.WriteLine($"Проверка сессии после установки: Username={sessionUsername}");
 
             var activity = new UserActivity
             {

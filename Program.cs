@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json.Serialization;
 using MySql.Data.MySqlClient;
 using BCrypt.Net;
-using Microsoft.AspNetCore.Http.Features; // Добавляем для FormOptions
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +38,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.Name = "AgroMarket.Session";
+    Console.WriteLine("Настройки сессии применены: SecurePolicy=Always, SameSite=None");
 });
 
 // Увеличиваем лимит на размер файла для multipart/form-data
@@ -141,7 +143,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowLocalhost"); // Перемещаем UseCors перед UseRouting
+app.UseCors("AllowLocalhost");
 app.UseStaticFiles();
 app.UseRouting();
 

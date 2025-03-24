@@ -26,29 +26,49 @@ namespace AgroMarket.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username)) return Unauthorized(new { Message = "Пользователь не авторизован." });
+            try
+            {
+                Console.WriteLine("Получен запрос на получение списка товаров");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-
-            if (user == null)
-                return Unauthorized(new { Message = "Пользователь не найден." });
-
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .Select(p => new ProductDto
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.Price,
-                    Stock = p.Stock,
-                    Description = p.Description,
-                    ImageUrl = p.ImageUrl,
-                    Category = p.Category != null ? p.Category.Name : null
-                })
-                .ToListAsync();
+                    Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    return Unauthorized(new { Message = "Пользователь не авторизован." });
+                }
 
-            return Ok(products);
+                Console.WriteLine($"Поиск пользователя: Username={username}");
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    Console.WriteLine("Пользователь не найден в базе данных.");
+                    return Unauthorized(new { Message = "Пользователь не найден." });
+                }
+
+                Console.WriteLine("Загружаем продукты из базы данных...");
+                var products = await _context.Products
+                    .Include(p => p.Category)
+                    .Select(p => new ProductDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.Price,
+                        Stock = p.Stock,
+                        Description = p.Description,
+                        ImageUrl = p.ImageUrl,
+                        Category = p.Category != null ? p.Category.Name : null
+                    })
+                    .ToListAsync();
+
+                Console.WriteLine($"Успешно загружено {products.Count} продуктов");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка в GetProducts: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return StatusCode(500, new { Message = "Внутренняя ошибка сервера", Details = ex.Message });
+            }
         }
 
         // Метод для получения информации о конкретном товаре
@@ -56,12 +76,19 @@ namespace AgroMarket.Backend.Controllers
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username)) return Unauthorized(new { Message = "Пользователь не авторизован." });
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                return Unauthorized(new { Message = "Пользователь не авторизован." });
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
+            {
+                Console.WriteLine("Пользователь не найден в базе данных.");
                 return Unauthorized(new { Message = "Пользователь не найден." });
+            }
 
             var product = await _context.Products
                 .Include(p => p.Category)
@@ -90,11 +117,18 @@ namespace AgroMarket.Backend.Controllers
         public async Task<ActionResult<Product>> CreateProduct([FromForm] ProductCreateModel model)
         {
             var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username)) return Unauthorized(new { Message = "Пользователь не авторизован." });
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                return Unauthorized(new { Message = "Пользователь не авторизован." });
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || user.Role?.Name != "Admin")
+            {
+                Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
                 return Unauthorized(new { Message = "Доступ только для администраторов." });
+            }
 
             var product = new Product
             {
@@ -135,11 +169,18 @@ namespace AgroMarket.Backend.Controllers
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductCreateModel model)
         {
             var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username)) return Unauthorized(new { Message = "Пользователь не авторизован." });
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                return Unauthorized(new { Message = "Пользователь не авторизован." });
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || user.Role?.Name != "Admin")
+            {
+                Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
                 return Unauthorized(new { Message = "Доступ только для администраторов." });
+            }
 
             var product = await _context.Products.FindAsync(id);
             if (product == null)
@@ -192,11 +233,18 @@ namespace AgroMarket.Backend.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username)) return Unauthorized(new { Message = "Пользователь не авторизован." });
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                return Unauthorized(new { Message = "Пользователь не авторизован." });
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || user.Role?.Name != "Admin")
+            {
+                Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
                 return Unauthorized(new { Message = "Доступ только для администраторов." });
+            }
 
             var product = await _context.Products.FindAsync(id);
             if (product == null)
