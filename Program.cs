@@ -3,11 +3,12 @@ using AgroMarket.Backend.Models;
 using AgroMarket.Backend.Services;
 using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed; // Добавляем для IDistributedCache
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json.Serialization;
 using MySql.Data.MySqlClient;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Http.Features; // Добавляем для FormOptions
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;
+});
+
+// Увеличиваем лимит на размер файла для multipart/form-data
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
 
 // Добавляем контроллеры
@@ -88,7 +95,7 @@ Console.WriteLine("Finished database connection attempt.");
 var app = builder.Build();
 
 // Создание пользователя admin, если он не существует
-using (var scope = app.Services.CreateScope()) // Используем IServiceScopeFactory через app.Services
+using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AgroMarketDbContext>();
     var adminRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
@@ -134,10 +141,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("AllowLocalhost"); // Перемещаем UseCors перед UseRouting
 app.UseStaticFiles();
 app.UseRouting();
-
-app.UseCors("AllowLocalhost");
 
 // Добавляем обработку OPTIONS запросов
 app.Use((context, next) =>

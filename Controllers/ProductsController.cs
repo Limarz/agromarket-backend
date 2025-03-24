@@ -9,7 +9,7 @@ using System.IO;
 
 namespace AgroMarket.Backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")] // Изменяем маршрут на api/admin/products
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -222,11 +222,11 @@ namespace AgroMarket.Backend.Controllers
 
     public class ProductCreateModel
     {
-        public string? Name { get; set; } // Делаем свойство допускающим null
+        public string? Name { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
-        public string? Description { get; set; } // Делаем свойство допускающим null
-        public IFormFile? Image { get; set; } // Делаем свойство допускающим null
+        public string? Description { get; set; }
+        public IFormFile? Image { get; set; }
         public int? CategoryId { get; set; }
     }
 }
