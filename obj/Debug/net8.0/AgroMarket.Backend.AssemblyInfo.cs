@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AgroMarket.Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8450e8d80eca8d1c6017efcf54f580877a777460")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e727831b04bfaf1fe9bd78303ee1e9af036042b8")]
 [assembly: System.Reflection.AssemblyProductAttribute("AgroMarket.Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AgroMarket.Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
