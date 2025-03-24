@@ -198,33 +198,6 @@ namespace AgroMarket.Backend.Controllers
             return Ok(product);
         }
 
-        // Метод для обновления существующего товара
-        [HttpPut("products/{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product updatedProduct)
-        {
-            if (!await IsAdmin())
-                return Unauthorized("Требуется авторизация администратора.");
-
-            if (updatedProduct == null || id != updatedProduct.Id || string.IsNullOrEmpty(updatedProduct.Name) || updatedProduct.Price <= 0 || updatedProduct.Stock < 0)
-            {
-                return BadRequest("Неверные данные продукта. Убедитесь, что указаны корректный ID, название, цена (> 0) и запас (>= 0).");
-            }
-
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound("Product not found");
-            }
-
-            product.Name = updatedProduct.Name;
-            product.Price = updatedProduct.Price;
-            product.Stock = updatedProduct.Stock;
-            product.Description = updatedProduct.Description;
-
-            await _context.SaveChangesAsync();
-            return Ok(product);
-        }
-
         // Метод для получения списка всех товаров
         [HttpGet("all-products")]
         public async Task<IActionResult> GetAllProducts()

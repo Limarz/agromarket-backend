@@ -141,6 +141,33 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Настройка pipeline (порядок важен!)
+// Добавляем middleware для обработки ошибок
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        // Добавляем CORS-заголовки даже при ошибке
+        context.Response.Headers["Access-Control-Allow-Origin"] = "https://agromarket-frontend.onrender.com";
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+
+        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        if (error != null)
+        {
+            var ex = error.Error;
+            await context.Response.WriteAsync(new
+            {
+                Message = "Внутренняя ошибка сервера",
+                Details = ex.Message
+            }.ToString());
+        }
+    });
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -152,7 +179,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Убедимся, что UseCors вызывается до UseRouting
 app.UseCors("AllowFrontend");
+
 app.UseStaticFiles();
 app.UseRouting();
 
