@@ -1,12 +1,125 @@
 {
   "Version": 1,
-  "Hash": "3X0WGrU2HrUN+4X2iLZuoHjeNowP+X8fq2BPA7qRhLA=",
+  "Hash": "uv/+xVmK5zPvYeNZbNrn7ERDRA5JLgip+79a/fs7Tqo=",
   "Source": "AgroMarket.Backend",
   "BasePath": "_content/AgroMarket.Backend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "AgroMarket.Backend\\wwwroot",
+      "Source": "AgroMarket.Backend",
+      "ContentRoot": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\",
+      "BasePath": "_content/AgroMarket.Backend",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\index.html",
+      "SourceId": "AgroMarket.Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\",
+      "BasePath": "_content/AgroMarket.Backend",
+      "RelativePath": "index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "z4oy90l3q6",
+      "Integrity": "s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "index.html",
+      "AssetFile": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "60"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 20 Mar 2025 13:57:58 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM="
+        }
+      ]
+    },
+    {
+      "Route": "index.z4oy90l3q6.html",
+      "AssetFile": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "60"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 20 Mar 2025 13:57:58 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "z4oy90l3q6"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM="
+        }
+      ]
+    }
+  ]
 }

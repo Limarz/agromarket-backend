@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\AgroMarket\\agromarket.backend\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.AgroMarket.Backend.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.AgroMarket.Backend.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.AgroMarket.Backend.props",
+      "PackagePath": "build\\AgroMarket.Backend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.AgroMarket.Backend.props",
+      "PackagePath": "buildMultiTargeting\\AgroMarket.Backend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.AgroMarket.Backend.props",
+      "PackagePath": "buildTransitive\\AgroMarket.Backend.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

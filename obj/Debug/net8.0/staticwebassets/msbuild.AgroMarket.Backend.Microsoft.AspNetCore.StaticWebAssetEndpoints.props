@@ -1,0 +1,16 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/AgroMarket.Backend/index.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\index.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"60"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u0022s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM=\u0022"},{"Name":"Last-Modified","Value":"Thu, 20 Mar 2025 13:57:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/AgroMarket.Backend/index.z4oy90l3q6.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\index.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"z4oy90l3q6"},{"Name":"integrity","Value":"sha256-s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM="},{"Name":"label","Value":"_content/AgroMarket.Backend/index.html"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"60"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u0022s2c4iZASu5pHt14ZLTJBl2QZj9sSzMxgD1Vjb4eKyQM=\u0022"},{"Name":"Last-Modified","Value":"Thu, 20 Mar 2025 13:57:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

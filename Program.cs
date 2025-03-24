@@ -1,14 +1,17 @@
 using AgroMarket.Backend.Data;
+using AgroMarket.Backend.Models;
+using AgroMarket.Backend.Services;
 using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed; // Добавляем для IDistributedCache
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json.Serialization;
 using MySql.Data.MySqlClient;
-using BCrypt.Net; // Добавляем для BCrypt
+using BCrypt.Net;
 
-// Добавляем CORS с поддержкой credentials
 var builder = WebApplication.CreateBuilder(args);
 
+// Добавляем CORS с поддержкой credentials
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
@@ -25,15 +28,15 @@ builder.Services.AddDbContext<AgroMarketDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 21))));
 
-// Настройка сессий
-builder.Services.AddDistributedMemoryCache();
+// Настройка кастомного IDistributedCache для сессий
+builder.Services.AddSingleton<IDistributedCache, MySqlDistributedCache>();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SameSite = SameSiteMode.None;
 });
 
 // Добавляем контроллеры
@@ -84,6 +87,41 @@ Console.WriteLine("Finished database connection attempt.");
 
 var app = builder.Build();
 
+// Создание пользователя admin, если он не существует
+using (var scope = app.Services.CreateScope()) // Используем IServiceScopeFactory через app.Services
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AgroMarketDbContext>();
+    var adminRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+    if (adminRole == null)
+    {
+        adminRole = new Role { Name = "Admin" };
+        dbContext.Roles.Add(adminRole);
+        await dbContext.SaveChangesAsync();
+        Console.WriteLine("Роль Admin создана.");
+    }
+
+    var adminUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+    if (adminUser == null)
+    {
+        adminUser = new User
+        {
+            Username = "admin",
+            Email = "admin@example.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+            RoleId = adminRole.Id,
+            IsPendingApproval = false,
+            IsBlocked = false
+        };
+        dbContext.Users.Add(adminUser);
+        await dbContext.SaveChangesAsync();
+        Console.WriteLine("Пользователь admin создан.");
+    }
+    else
+    {
+        Console.WriteLine("Пользователь admin уже существует.");
+    }
+}
+
 // Настройка pipeline (порядок важен!)
 if (app.Environment.IsDevelopment())
 {
@@ -96,7 +134,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseStaticFiles(); // Добавляем поддержку статических файлов
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseCors("AllowLocalhost");
@@ -106,10 +144,10 @@ app.Use((context, next) =>
 {
     if (context.Request.Method == "OPTIONS")
     {
-        context.Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
-        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
-        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+        context.Response.Headers["Access-Control-Allow-Origin"] = "https://agromarket-frontend.onrender.com";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
         context.Response.StatusCode = 200;
         return Task.CompletedTask;
     }
