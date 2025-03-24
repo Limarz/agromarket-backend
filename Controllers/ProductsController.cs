@@ -30,25 +30,18 @@ namespace AgroMarket.Backend.Controllers
             {
                 Console.WriteLine("Получен запрос на получение списка товаров");
 
-                // Временно убираем проверку сессии для отладки
-                // var username = HttpContext.Session.GetString("Username");
-                // if (string.IsNullOrEmpty(username))
-                // {
-                //     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
-                //     return Unauthorized(new { Message = "Пользователь не авторизован." });
-                // }
-
-                // Console.WriteLine($"Поиск пользователя: Username={username}");
-                // var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-                // if (user == null)
-                // {
-                //     Console.WriteLine("Пользователь не найден в базе данных.");
-                //     return Unauthorized(new { Message = "Пользователь не найден." });
-                // }
+                // Проверяем доступность базы данных
+                Console.WriteLine("Проверяем доступность базы данных...");
+                var canConnect = await _context.Database.CanConnectAsync();
+                if (!canConnect)
+                {
+                    Console.WriteLine("Ошибка: Не удалось подключиться к базе данных.");
+                    return StatusCode(500, new { Message = "Не удалось подключиться к базе данных." });
+                }
 
                 Console.WriteLine("Загружаем продукты из базы данных...");
+                // Упрощаем запрос, убираем Include и сложную проекцию
                 var products = await _context.Products
-                    .Include(p => p.Category)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -57,7 +50,7 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description,
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category != null ? p.Category.Name : null
+                        Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .ToListAsync();
 
@@ -68,6 +61,10 @@ namespace AgroMarket.Backend.Controllers
             {
                 Console.WriteLine($"Ошибка в GetProducts: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
                 return StatusCode(500, new { Message = "Внутренняя ошибка сервера", Details = ex.Message });
             }
         }
