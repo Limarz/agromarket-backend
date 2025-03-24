@@ -47,38 +47,33 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не найден." });
                 }
 
-                // Проверяем доступность базы данных
-                Console.WriteLine("Проверяем доступность базы данных...");
-                var canConnect = await _context.Database.CanConnectAsync();
-                if (!canConnect)
+                // Тестовый ответ без базы данных
+                Console.WriteLine("Возвращаем тестовый список продуктов...");
+                var products = new List<ProductDto>
                 {
-                    Console.WriteLine("Ошибка: Не удалось подключиться к базе данных.");
-                    return StatusCode(500, new { Message = "Не удалось подключиться к базе данных." });
-                }
-                Console.WriteLine("База данных доступна.");
-
-                // Проверяем, есть ли записи в таблице Products
-                Console.WriteLine("Проверяем наличие записей в таблице Products...");
-                var productCount = await _context.Products.CountAsync();
-                Console.WriteLine($"Найдено {productCount} продуктов в базе данных.");
-
-                // Упрощённый запрос: убираем всё, что связано с Category
-                Console.WriteLine("Загружаем продукты из базы данных...");
-                var products = await _context.Products
-                    .Select(p => new ProductDto
+                    new ProductDto
                     {
-                        Id = p.Id,
-                        Name = p.Name ?? "Без названия",
-                        Price = p.Price,
-                        Stock = p.Stock,
-                        Description = p.Description ?? "Без описания",
-                        ImageUrl = p.ImageUrl ?? "Без изображения",
-                        Category = "Без категории" // Убираем доступ к Category
-                    })
-                    .Take(5) // Ограничиваем количество записей для теста
-                    .ToListAsync();
+                        Id = 1,
+                        Name = "Тестовый продукт 1",
+                        Price = 100,
+                        Stock = 10,
+                        Description = "Описание тестового продукта 1",
+                        ImageUrl = "test-image1.jpg",
+                        Category = "Тестовая категория"
+                    },
+                    new ProductDto
+                    {
+                        Id = 2,
+                        Name = "Тестовый продукт 2",
+                        Price = 200,
+                        Stock = 20,
+                        Description = "Описание тестового продукта 2",
+                        ImageUrl = "test-image2.jpg",
+                        Category = "Тестовая категория"
+                    }
+                };
 
-                Console.WriteLine($"Успешно загружено {products.Count} продуктов");
+                Console.WriteLine($"Успешно возвращено {products.Count} тестовых продуктов");
                 foreach (var product in products)
                 {
                     Console.WriteLine($"Продукт: Id={product.Id}, Name={product.Name}, Price={product.Price}");
