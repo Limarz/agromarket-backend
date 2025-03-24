@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "RsaEn2wBn6k=",
+  "dgSpecHash": "naZznbgzbd4=",
   "success": true,
-  "projectFilePath": "D:\\AgroMarket\\agromarket.backend\\AgroMarket.Backend.csproj",
+  "projectFilePath": "D:\\AgroMarket\\AgroMarket.Backend\\AgroMarket.Backend.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Anna\\.nuget\\packages\\awssdk.core\\3.7.402.24\\awssdk.core.3.7.402.24.nupkg.sha512",
+    "C:\\Users\\Anna\\.nuget\\packages\\awssdk.s3\\3.7.415.23\\awssdk.s3.3.7.415.23.nupkg.sha512",
     "C:\\Users\\Anna\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\Anna\\.nuget\\packages\\bouncycastle.cryptography\\2.3.1\\bouncycastle.cryptography.2.3.1.nupkg.sha512",
     "C:\\Users\\Anna\\.nuget\\packages\\google.protobuf\\3.26.1\\google.protobuf.3.26.1.nupkg.sha512",

@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Настройка Data Protection
 var keysDirectory = Path.Combine(Directory.GetCurrentDirectory(), "storage", "DataProtection-Keys");
-Directory.CreateDirectory(keysDirectory); // Создаём папку, если её нет
+Directory.CreateDirectory(keysDirectory);
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory))
     .SetApplicationName("AgroMarket");
@@ -24,9 +24,9 @@ builder.Services.AddDataProtection()
 // Добавляем CORS с поддержкой credentials
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", builder =>
+    options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("https://localhost:3000", "https://agromarket-frontend.onrender.com")
+        builder.WithOrigins("https://agromarket-frontend.onrender.com")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -152,7 +152,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowLocalhost");
+app.UseCors("AllowFrontend");
 app.UseStaticFiles();
 app.UseRouting();
 

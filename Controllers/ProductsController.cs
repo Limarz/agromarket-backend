@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using System.IO;
+using Amazon.S3; // Для работы с S3 API
+using Amazon.S3.Model; // Для запросов к S3
 
 namespace AgroMarket.Backend.Controllers
 {
@@ -14,12 +15,31 @@ namespace AgroMarket.Backend.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly AgroMarketDbContext _context;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IAmazonS3 _s3Client; // Клиент для Yandex Cloud (S3-совместимый)
+        private readonly string _bucketName;
 
-        public ProductsController(AgroMarketDbContext context, IWebHostEnvironment environment)
+        public ProductsController(AgroMarketDbContext context, IConfiguration configuration)
         {
             _context = context;
-            _environment = environment;
+
+            // Настройка клиента для Yandex Cloud
+            var accessKey = configuration["YandexCloud:AccessKey"];
+            var secretKey = configuration["YandexCloud:SecretKey"];
+            _bucketName = configuration["YandexCloud:BucketName"];
+            var endpoint = configuration["YandexCloud:Endpoint"];
+
+            if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(_bucketName) || string.IsNullOrEmpty(endpoint))
+            {
+                throw new ArgumentException("Yandex Cloud configuration is missing.");
+            }
+
+            var s3Config = new AmazonS3Config
+            {
+                ServiceURL = endpoint,
+                ForcePathStyle = true
+            };
+
+            _s3Client = new AmazonS3Client(accessKey, secretKey, s3Config);
         }
 
         // Метод для получения списка всех товаров
@@ -30,7 +50,6 @@ namespace AgroMarket.Backend.Controllers
             {
                 Console.WriteLine("Получен запрос на получение списка товаров");
 
-                // Проверяем сессию
                 var username = HttpContext.Session.GetString("Username");
                 Console.WriteLine($"Username из сессии: {username}");
                 if (string.IsNullOrEmpty(username))
@@ -47,9 +66,8 @@ namespace AgroMarket.Backend.Controllers
                     return Unauthorized(new { Message = "Пользователь не найден." });
                 }
 
-                // Получаем продукты из базы данных с категориями
                 var products = await _context.Products
-                    .Include(p => p.Category) // Подключаем категорию
+                    .Include(p => p.Category)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -57,7 +75,7 @@ namespace AgroMarket.Backend.Controllers
                         Price = p.Price,
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
-                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        ImageUrl = p.ImageUrl, // Теперь это URL от Yandex Cloud
                         Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .ToListAsync();
@@ -104,7 +122,7 @@ namespace AgroMarket.Backend.Controllers
                 }
 
                 var product = await _context.Products
-                    .Include(p => p.Category) // Подключаем категорию
+                    .Include(p => p.Category)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -112,7 +130,7 @@ namespace AgroMarket.Backend.Controllers
                         Price = p.Price,
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
-                        ImageUrl = p.ImageUrl ?? "Без изображения",
+                        ImageUrl = p.ImageUrl,
                         Category = p.Category != null ? p.Category.Name : "Без категории"
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
@@ -163,24 +181,27 @@ namespace AgroMarket.Backend.Controllers
                     CategoryId = model.CategoryId
                 };
 
-                // Обработка загрузки изображения
+                // Обработка загрузки изображения в Yandex Cloud
                 if (model.Image != null)
                 {
-                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolder))
+                    var fileName = $"products/{Guid.NewGuid()}_{model.Image.FileName}";
+                    using var stream = model.Image.OpenReadStream();
+                    var putRequest = new PutObjectRequest
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        BucketName = _bucketName,
+                        Key = fileName,
+                        InputStream = stream,
+                        ContentType = model.Image.ContentType
+                    };
+
+                    var response = await _s3Client.PutObjectAsync(putRequest);
+                    if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        throw new Exception("Ошибка загрузки изображения в Yandex Cloud.");
                     }
 
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.Image.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.Image.CopyToAsync(stream);
-                    }
-
-                    product.ImageUrl = $"/uploads/{fileName}";
+                    product.ImageUrl = $"https://storage.yandexcloud.net/{_bucketName}/{fileName}";
+                    Console.WriteLine($"Изображение загружено в Yandex Cloud: {product.ImageUrl}");
                 }
 
                 _context.Products.Add(product);
@@ -229,34 +250,40 @@ namespace AgroMarket.Backend.Controllers
                 product.Description = model.Description;
                 product.CategoryId = model.CategoryId;
 
-                // Обработка загрузки нового изображения
+                // Обработка загрузки нового изображения в Yandex Cloud
                 if (model.Image != null)
                 {
-                    // Удаляем старое изображение, если оно есть
+                    // Удаляем старое изображение из Yandex Cloud, если оно есть
                     if (!string.IsNullOrEmpty(product.ImageUrl))
                     {
-                        var oldFilePath = Path.Combine(_environment.WebRootPath, product.ImageUrl.TrimStart('/'));
-                        if (System.IO.File.Exists(oldFilePath))
+                        var oldFileName = product.ImageUrl.Replace($"https://storage.yandexcloud.net/{_bucketName}/", "");
+                        var deleteRequest = new DeleteObjectRequest
                         {
-                            System.IO.File.Delete(oldFilePath);
-                        }
+                            BucketName = _bucketName,
+                            Key = oldFileName
+                        };
+                        await _s3Client.DeleteObjectAsync(deleteRequest);
+                        Console.WriteLine($"Старое изображение удалено из Yandex Cloud: {oldFileName}");
                     }
 
-                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolder))
+                    var fileName = $"products/{Guid.NewGuid()}_{model.Image.FileName}";
+                    using var stream = model.Image.OpenReadStream();
+                    var putRequest = new PutObjectRequest
                     {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
+                        BucketName = _bucketName,
+                        Key = fileName,
+                        InputStream = stream,
+                        ContentType = model.Image.ContentType
+                    };
 
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.Image.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    var response = await _s3Client.PutObjectAsync(putRequest);
+                    if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
                     {
-                        await model.Image.CopyToAsync(stream);
+                        throw new Exception("Ошибка загрузки изображения в Yandex Cloud.");
                     }
 
-                    product.ImageUrl = $"/uploads/{fileName}";
+                    product.ImageUrl = $"https://storage.yandexcloud.net/{_bucketName}/{fileName}";
+                    Console.WriteLine($"Новое изображение загружено в Yandex Cloud: {product.ImageUrl}");
                 }
 
                 await _context.SaveChangesAsync();
@@ -298,14 +325,17 @@ namespace AgroMarket.Backend.Controllers
                     return NotFound();
                 }
 
-                // Удаляем изображение, если оно есть
+                // Удаляем изображение из Yandex Cloud, если оно есть
                 if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
-                    var filePath = Path.Combine(_environment.WebRootPath, product.ImageUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(filePath))
+                    var fileName = product.ImageUrl.Replace($"https://storage.yandexcloud.net/{_bucketName}/", "");
+                    var deleteRequest = new DeleteObjectRequest
                     {
-                        System.IO.File.Delete(filePath);
-                    }
+                        BucketName = _bucketName,
+                        Key = fileName
+                    };
+                    await _s3Client.DeleteObjectAsync(deleteRequest);
+                    Console.WriteLine($"Изображение удалено из Yandex Cloud: {fileName}");
                 }
 
                 _context.Products.Remove(product);
