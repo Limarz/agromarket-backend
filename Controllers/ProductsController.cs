@@ -38,9 +38,15 @@ namespace AgroMarket.Backend.Controllers
                     Console.WriteLine("Ошибка: Не удалось подключиться к базе данных.");
                     return StatusCode(500, new { Message = "Не удалось подключиться к базе данных." });
                 }
+                Console.WriteLine("База данных доступна.");
 
+                // Проверяем, есть ли записи в таблице Products
+                Console.WriteLine("Проверяем наличие записей в таблице Products...");
+                var productCount = await _context.Products.CountAsync();
+                Console.WriteLine($"Найдено {productCount} продуктов в базе данных.");
+
+                // Упрощаем запрос до минимума
                 Console.WriteLine("Загружаем продукты из базы данных...");
-                // Упрощаем запрос, убираем Include и сложную проекцию
                 var products = await _context.Products
                     .Select(p => new ProductDto
                     {
@@ -50,8 +56,9 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description,
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                        Category = "Тестовая категория" // Временно убираем доступ к Category
                     })
+                    .Take(5) // Ограничиваем количество записей для теста
                     .ToListAsync();
 
                 Console.WriteLine($"Успешно загружено {products.Count} продуктов");
@@ -91,7 +98,6 @@ namespace AgroMarket.Backend.Controllers
                 }
 
                 var product = await _context.Products
-                    .Include(p => p.Category)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -100,7 +106,7 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description,
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category != null ? p.Category.Name : null
+                        Category = "Тестовая категория"
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
 

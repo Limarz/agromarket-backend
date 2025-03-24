@@ -131,6 +131,9 @@ namespace AgroMarket.Backend.Controllers
             var sessionUsername = HttpContext.Session.GetString("Username");
             Console.WriteLine($"Проверка сессии после установки: Username={sessionUsername}");
 
+            // Добавляем заголовок для отладки
+            HttpContext.Response.Headers.Add("Set-Cookie-Debug", $"AgroMarket.Session={HttpContext.Session.Id}; path=/; samesite=none; secure; httponly");
+
             var activity = new UserActivity
             {
                 UserId = user.Id,
