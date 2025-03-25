@@ -57,6 +57,9 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
 
+// Добавляем сервис для Yandex Cloud
+builder.Services.AddSingleton<IYandexCloudStorageService, YandexCloudStorageService>();
+
 // Добавляем контроллеры
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

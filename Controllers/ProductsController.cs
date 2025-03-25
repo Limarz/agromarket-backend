@@ -67,6 +67,7 @@ namespace AgroMarket.Backend.Controllers
 
                 var products = await _context.Products
                     .Include(p => p.Category)
+                    .Where(p => p.Name != null) // Фильтруем записи с пустым Name
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -75,7 +76,8 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                        Category = p.Category != null ? p.Category.Name : "Без категории",
+                        CategoryId = p.CategoryId
                     })
                     .ToListAsync();
 
@@ -121,6 +123,7 @@ namespace AgroMarket.Backend.Controllers
 
                 var product = await _context.Products
                     .Include(p => p.Category)
+                    .Where(p => p.Name != null) // Фильтруем записи с пустым Name
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -129,7 +132,8 @@ namespace AgroMarket.Backend.Controllers
                         Stock = p.Stock,
                         Description = p.Description ?? "Без описания",
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category != null ? p.Category.Name : "Без категории"
+                        Category = p.Category != null ? p.Category.Name : "Без категории",
+                        CategoryId = p.CategoryId
                     })
                     .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -167,6 +171,12 @@ namespace AgroMarket.Backend.Controllers
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
                     return Unauthorized(new { Message = "Доступ только для администраторов." });
+                }
+
+                if (string.IsNullOrEmpty(model.Name))
+                {
+                    Console.WriteLine("Ошибка: Название товара не указано.");
+                    return BadRequest(new { Message = "Название товара обязательно." });
                 }
 
                 var product = new Product
@@ -240,6 +250,12 @@ namespace AgroMarket.Backend.Controllers
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
                     return Unauthorized(new { Message = "Доступ только для администраторов." });
+                }
+
+                if (string.IsNullOrEmpty(model.Name))
+                {
+                    Console.WriteLine("Ошибка: Название товара не указано.");
+                    return BadRequest(new { Message = "Название товара обязательно." });
                 }
 
                 var product = await _context.Products.FindAsync(id);
@@ -368,6 +384,18 @@ namespace AgroMarket.Backend.Controllers
         public int Stock { get; set; }
         public string? Description { get; set; }
         public IFormFile? Image { get; set; }
+        public int? CategoryId { get; set; }
+    }
+
+    public class ProductDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public string Category { get; set; }
         public int? CategoryId { get; set; }
     }
 }
