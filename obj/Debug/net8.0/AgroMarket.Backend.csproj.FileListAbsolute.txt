@@ -154,3 +154,5 @@ D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\System.Diagnostics.DiagnosticS
 D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
 D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\System.Security.Cryptography.Xml.dll
 D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
+D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\AWSSDK.Core.dll
+D:\AgroMarket\agromarket.backend\bin\Debug\net8.0\AWSSDK.S3.dll

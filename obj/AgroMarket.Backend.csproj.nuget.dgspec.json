@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\AgroMarket\\AgroMarket.Backend\\AgroMarket.Backend.csproj": {}
+    "D:\\AgroMarket\\agromarket.backend\\AgroMarket.Backend.csproj": {}
   },
   "projects": {
-    "D:\\AgroMarket\\AgroMarket.Backend\\AgroMarket.Backend.csproj": {
+    "D:\\AgroMarket\\agromarket.backend\\AgroMarket.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\AgroMarket\\AgroMarket.Backend\\AgroMarket.Backend.csproj",
+        "projectUniqueName": "D:\\AgroMarket\\agromarket.backend\\AgroMarket.Backend.csproj",
         "projectName": "AgroMarket.Backend",
-        "projectPath": "D:\\AgroMarket\\AgroMarket.Backend\\AgroMarket.Backend.csproj",
+        "projectPath": "D:\\AgroMarket\\agromarket.backend\\AgroMarket.Backend.csproj",
         "packagesPath": "C:\\Users\\Anna\\.nuget\\packages\\",
-        "outputPath": "D:\\AgroMarket\\AgroMarket.Backend\\obj\\",
+        "outputPath": "D:\\AgroMarket\\agromarket.backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

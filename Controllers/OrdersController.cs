@@ -19,7 +19,6 @@ namespace AgroMarket.Backend.Controllers
             _context = context;
         }
 
-        // Метод для получения списка заказов пользователя
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
         {
@@ -38,7 +37,6 @@ namespace AgroMarket.Backend.Controllers
                 .ToListAsync();
         }
 
-        // Метод для получения всех заказов (для админ-панели)
         [HttpGet("admin/orders")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllOrders()
         {
@@ -54,9 +52,10 @@ namespace AgroMarket.Backend.Controllers
                         o.OrderDate,
                         o.TotalAmount,
                         o.Status,
-                        Username = o.User != null ? o.User.Username : "Неизвестный", // Проверка на null
+                        Username = o.User != null ? o.User.Username : "Неизвестный",
                         o.DeliveryAddress,
                         o.DeliveryTimeSlot,
+                        o.DeliveryDate, // Добавляем дату доставки
                         o.DeliveryLatitude,
                         o.DeliveryLongitude,
                         Items = o.Items.Select(oi => new
@@ -64,7 +63,7 @@ namespace AgroMarket.Backend.Controllers
                             oi.ProductId,
                             oi.Quantity,
                             oi.UnitPrice,
-                            ProductName = oi.Product != null ? oi.Product.Name : "Неизвестный товар" // Проверка на null
+                            ProductName = oi.Product != null ? oi.Product.Name : "Неизвестный товар"
                         }).ToList()
                     })
                     .ToListAsync();
@@ -73,14 +72,12 @@ namespace AgroMarket.Backend.Controllers
             }
             catch (Exception ex)
             {
-                // Логируем ошибку для диагностики
                 Console.WriteLine($"Ошибка в GetAllOrders: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
                 return StatusCode(500, new { message = "Произошла ошибка на сервере.", details = ex.Message });
             }
         }
 
-        // Метод для создания нового заказа
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder([FromBody] OrderCreateRequest request)
         {
@@ -92,9 +89,9 @@ namespace AgroMarket.Backend.Controllers
 
             if (user == null) return Unauthorized();
 
-            if (string.IsNullOrEmpty(request.DeliveryAddress) || string.IsNullOrEmpty(request.DeliveryTimeSlot))
+            if (string.IsNullOrEmpty(request.DeliveryAddress) || string.IsNullOrEmpty(request.DeliveryTimeSlot) || request.DeliveryDate == null)
             {
-                return BadRequest("Адрес доставки и временной слот должны быть указаны.");
+                return BadRequest("Адрес доставки, временной слот и дата доставки должны быть указаны.");
             }
 
             var cart = await _context.Carts
@@ -119,6 +116,9 @@ namespace AgroMarket.Backend.Controllers
                 Status = "Pending",
                 DeliveryAddress = request.DeliveryAddress,
                 DeliveryTimeSlot = request.DeliveryTimeSlot,
+                DeliveryDate = request.DeliveryDate, // Сохраняем дату доставки
+                DeliveryLatitude = request.DeliveryLocation?.Latitude,
+                DeliveryLongitude = request.DeliveryLocation?.Longitude,
                 TotalAmount = cart.Items.Sum(ci => ci.Product?.Price * ci.Quantity ?? 0),
                 Items = cart.Items.Select(ci => new OrderItem
                 {
@@ -149,7 +149,6 @@ namespace AgroMarket.Backend.Controllers
             return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, order);
         }
 
-        // Метод для подтверждения заказа
         [HttpPut("{id}/confirm")]
         public async Task<IActionResult> ConfirmOrder(int id)
         {
@@ -179,7 +178,6 @@ namespace AgroMarket.Backend.Controllers
             return Ok(new { message = "Заказ подтверждён!" });
         }
 
-        // Метод для изменения статуса заказа (для админ-панели)
         [HttpPut("admin/orders/{orderId}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] UpdateOrderStatusDto dto)
@@ -194,12 +192,6 @@ namespace AgroMarket.Backend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Статус заказа обновлён." });
         }
-    }
-
-    public class OrderCreateRequest
-    {
-        public string? DeliveryAddress { get; set; }
-        public string? DeliveryTimeSlot { get; set; }
     }
 
     public class UpdateOrderStatusDto

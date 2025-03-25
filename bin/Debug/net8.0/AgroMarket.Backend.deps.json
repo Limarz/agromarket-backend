@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v8.0": {
       "AgroMarket.Backend/1.0.0": {
         "dependencies": {
+          "AWSSDK.S3": "3.7.415.23",
           "BCrypt.Net-Next": "4.0.3",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.0",
           "Microsoft.AspNetCore.Session": "2.3.0",
@@ -20,6 +21,25 @@
         },
         "runtime": {
           "AgroMarket.Backend.dll": {}
+        }
+      },
+      "AWSSDK.Core/3.7.402.24": {
+        "runtime": {
+          "lib/net8.0/AWSSDK.Core.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.402.24"
+          }
+        }
+      },
+      "AWSSDK.S3/3.7.415.23": {
+        "dependencies": {
+          "AWSSDK.Core": "3.7.402.24"
+        },
+        "runtime": {
+          "lib/net8.0/AWSSDK.S3.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.415.23"
+          }
         }
       },
       "BCrypt.Net-Next/4.0.3": {
@@ -1085,6 +1105,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "AWSSDK.Core/3.7.402.24": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xcUx7ntQE7DYcdlL0/IPb4DXPpQfH/OL11M9Swcm6iDPhX1S/Hu0neWVf5gBuRe58Sei0cX24qKjol+mDhcNwA==",
+      "path": "awssdk.core/3.7.402.24",
+      "hashPath": "awssdk.core.3.7.402.24.nupkg.sha512"
+    },
+    "AWSSDK.S3/3.7.415.23": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ME1KxEwaxO5HMzjJSADVWl1oyfnEjqU3vOkVwot5jJZNQiz9Fhlbv8itpRmcoI23UCkDC3FDzzlrHvSjLewNaQ==",
+      "path": "awssdk.s3/3.7.415.23",
+      "hashPath": "awssdk.s3.3.7.415.23.nupkg.sha512"
     },
     "BCrypt.Net-Next/4.0.3": {
       "type": "package",
