@@ -39,7 +39,7 @@ builder.Services.AddDbContext<AgroMarketDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 21))));
 
 // Настройка кастомного IDistributedCache для сессий
-builder.Services.AddSingleton<IDistributedCache, MySqlDistributedCache>();
+builder.Services.AddDistributedMemoryCache(); // Используем MemoryDistributedCache для теста
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

@@ -54,6 +54,8 @@ namespace AgroMarket.Backend.Controllers
                 if (string.IsNullOrEmpty(username))
                 {
                     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
@@ -62,12 +64,14 @@ namespace AgroMarket.Backend.Controllers
                 if (user == null)
                 {
                     Console.WriteLine("Пользователь не найден в базе данных.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не найден." });
                 }
 
                 var products = await _context.Products
                     .Include(p => p.Category)
-                    .Where(p => p.Name != null) // Фильтруем записи с пустым Name
+                    .Where(p => p.Name != null)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -110,6 +114,8 @@ namespace AgroMarket.Backend.Controllers
                 if (string.IsNullOrEmpty(username))
                 {
                     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
@@ -118,12 +124,14 @@ namespace AgroMarket.Backend.Controllers
                 if (user == null)
                 {
                     Console.WriteLine("Пользователь не найден в базе данных.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не найден." });
                 }
 
                 var product = await _context.Products
                     .Include(p => p.Category)
-                    .Where(p => p.Name != null) // Фильтруем записи с пустым Name
+                    .Where(p => p.Name != null)
                     .Select(p => new ProductDto
                     {
                         Id = p.Id,
@@ -161,6 +169,8 @@ namespace AgroMarket.Backend.Controllers
                 if (string.IsNullOrEmpty(username))
                 {
                     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
@@ -170,6 +180,8 @@ namespace AgroMarket.Backend.Controllers
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Доступ только для администраторов." });
                 }
 
@@ -240,6 +252,8 @@ namespace AgroMarket.Backend.Controllers
                 if (string.IsNullOrEmpty(username))
                 {
                     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
@@ -249,8 +263,13 @@ namespace AgroMarket.Backend.Controllers
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Доступ только для администраторов." });
                 }
+
+                // Логируем полученные данные
+                Console.WriteLine($"Полученные данные: Name={model.Name}, Price={model.Price}, Stock={model.Stock}, Description={model.Description}, CategoryId={model.CategoryId}, Image={(model.Image != null ? model.Image.FileName : "null")}");
 
                 if (string.IsNullOrEmpty(model.Name))
                 {
@@ -334,6 +353,8 @@ namespace AgroMarket.Backend.Controllers
                 if (string.IsNullOrEmpty(username))
                 {
                     Console.WriteLine("Пользователь не авторизован: Username не найден в сессии.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Пользователь не авторизован." });
                 }
 
@@ -343,6 +364,8 @@ namespace AgroMarket.Backend.Controllers
                 if (user == null || user.Role?.Name != "Admin")
                 {
                     Console.WriteLine("Доступ запрещён: Пользователь не администратор.");
+                    Response.Headers.Add("Access-Control-Allow-Origin", "https://agromarket-frontend.onrender.com");
+                    Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                     return Unauthorized(new { Message = "Доступ только для администраторов." });
                 }
 
